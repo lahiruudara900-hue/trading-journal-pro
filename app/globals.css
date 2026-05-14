@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: #0a0a0f;
+  color: #e8e8f0;
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #111118; }
+::-webkit-scrollbar-thumb { background: #1f1f2e; border-radius: 3px; }
+
+.form-input {
+  @apply w-full bg-[#111118] border border-[#1f1f2e] rounded-lg px-3 py-2.5 text-sm text-white placeholder-[#555570] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors;
+}
+.form-select {
+  @apply w-full bg-[#111118] border border-[#1f1f2e] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer;
+}
+.form-label {
+  @apply block text-xs font-medium text-[#8888a0] mb-1.5 uppercase tracking-wider;
+}
+.card {
+  @apply bg-[#16161f] border border-[#1f1f2e] rounded-xl;
+}
+.btn-primary {
+  @apply bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.btn-secondary {
+  @apply bg-[#1e1e2a] hover:bg-[#252535] text-[#c0c0d8] font-medium px-4 py-2.5 rounded-lg text-sm transition-all duration-150 border border-[#1f1f2e];
+}
+.btn-danger {
+  @apply bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium px-4 py-2.5 rounded-lg text-sm transition-all duration-150 border border-red-500/20;
+}
+.badge {
+  @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+}
+.badge-win { @apply badge bg-emerald-500/10 text-emerald-400; }
+.badge-loss { @apply badge bg-red-500/10 text-red-400; }
+.badge-breakeven { @apply badge bg-amber-500/10 text-amber-400; }
+.badge-buy { @apply badge bg-emerald-500/10 text-emerald-400; }
+.badge-sell { @apply badge bg-red-500/10 text-red-400; }
+.card-glow:hover {
+  border-color: rgba(59,130,246,0.3);
+  box-shadow: 0 0 20px rgba(59,130,246,0.05);
+  transition: all 0.2s;
+}
+.data-table th {
+  @apply text-xs font-medium text-[#8888a0] uppercase tracking-wider text-left py-3 px-4 border-b border-[#1f1f2e] bg-[#111118];
+}
+.data-table td {
+  @apply py-3 px-4 text-sm border-b border-[#1f1f2e]/50;
+}
+.data-table tr:last-child td { @apply border-b-0; }
+.data-table tbody tr:hover td { @apply bg-[#1e1e2a]; }
+.num { font-family: 'DM Mono', monospace; }
