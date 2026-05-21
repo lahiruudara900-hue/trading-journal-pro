@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,7 +7,7 @@ html { scroll-behavior: smooth; }
 body {
   background-color: #0a0a0f;
   color: #e8e8f0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -58,4 +56,4 @@ body {
 }
 .data-table tr:last-child td { @apply border-b-0; }
 .data-table tbody tr:hover td { @apply bg-[#1e1e2a]; }
-.num { font-family: 'DM Mono', monospace; }
+.num { font-family: monospace; }
