@@ -9,6 +9,7 @@ export default function FieldTypeIcon({ type }: { type: FieldType }) {
     date:        '📅',
     checkbox:    '✅',
     textarea:    '📄',
+    screenshot:  '📸',
   }
   return <span title={type}>{icons[type] || '📝'}</span>
 }

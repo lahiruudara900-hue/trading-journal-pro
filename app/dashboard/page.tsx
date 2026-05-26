@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import Sidebar from '@/components/Sidebar'
-import DashboardCard from '@/components/DashboardCard'
 import { getSupabaseClient } from '@/lib/supabase'
 import { Trade } from '@/lib/types'
-import { calculateDashboardStats, getPairPerformance, getSetupPerformance, getMonthlyPerformance, formatPL } from '@/lib/calculations'
+import { loadTrades } from '@/lib/trades'
+import { calculateDashboardStats, getMonthlyPerformance, formatPL } from '@/lib/calculations'
 
 export default function DashboardPage() {
   const [trades, setTrades] = useState<Trade[]>([])
@@ -18,143 +18,203 @@ export default function DashboardPage() {
       const supabase = getSupabaseClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { data } = await supabase.from('trades').select('*').eq('user_id', user.id).order('trade_date', { ascending: false })
-      setTrades(data || []); setLoading(false)
+      const data = await loadTrades(user.id)
+      setTrades(data)
+      setLoading(false)
     }
     load()
   }, [])
 
   const stats = calculateDashboardStats(trades)
-  const pairPerf = getPairPerformance(trades).slice(0, 8)
-  const setupPerf = getSetupPerformance(trades)
   const monthly = getMonthlyPerformance(trades)
   const plColor = (v: number) => v > 0 ? '#10b981' : v < 0 ? '#ef4444' : '#8888a0'
+
+  const StatCard = ({ title, value, color, icon }: {
+    title: string; value: string; color?: string; icon: string
+  }) => (
+    <div style={{
+      backgroundColor: '#16161f', border: '1px solid #1f1f2e',
+      borderRadius: '0.75rem', padding: '1rem',
+      display: 'flex', flexDirection: 'column', gap: '0.5rem',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#8888a0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</span>
+        <span style={{ fontSize: '1.125rem' }}>{icon}</span>
+      </div>
+      <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'monospace', color: color || 'white' }}>{value}</div>
+    </div>
+  )
 
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen">
         <Sidebar />
         <main className="flex-1 md:ml-56 pt-14 md:pt-0">
-          <div className="px-4 sm:px-6 py-6 max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <div><h1 className="text-xl font-bold text-white">Dashboard</h1><p className="text-sm text-[#8888a0]">Your trading performance overview</p></div>
-              <Link href="/trades/add" className="btn-primary text-sm">+ Add Trade</Link>
+          <div style={{ padding: '1.5rem', maxWidth: '80rem', margin: '0 auto' }}>
+
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white', marginBottom: '0.25rem' }}>Dashboard</h1>
+                <p style={{ fontSize: '0.875rem', color: '#8888a0' }}>Your trading performance overview</p>
+              </div>
+              <Link href="/trades/add" className="btn-primary" style={{ fontSize: '0.875rem' }}>+ Add Trade</Link>
             </div>
 
             {loading ? (
-              <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}>
+                <div style={{ width: '2rem', height: '2rem', border: '2px solid #3b82f6', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+              </div>
             ) : trades.length === 0 ? (
-              <div className="card p-10 text-center">
-                <div className="text-4xl mb-4">📈</div>
-                <h2 className="text-lg font-semibold text-white mb-2">No trades yet</h2>
-                <p className="text-[#8888a0] text-sm mb-4">Start logging your trades to see performance insights.</p>
-                <Link href="/trades/add" className="btn-primary">Log Your First Trade</Link>
+              <div style={{
+                backgroundColor: '#16161f', border: '1px solid #1f1f2e',
+                borderRadius: '0.75rem', padding: '2.5rem', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📈</div>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'white', marginBottom: '0.5rem' }}>No trades yet</h2>
+                <p style={{ fontSize: '0.875rem', color: '#8888a0', marginBottom: '1.25rem' }}>
+                  Start by setting up your fields, then log your first trade.
+                </p>
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <Link href="/fields" className="btn-secondary">🧩 Set Up Fields</Link>
+                  <Link href="/trades/add" className="btn-primary">+ Log First Trade</Link>
+                </div>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <DashboardCard title="Total P&L" value={formatPL(stats.totalPL)} color={stats.totalPL > 0 ? 'profit' : stats.totalPL < 0 ? 'loss' : 'default'} icon="💰" />
-                  <DashboardCard title="Win Rate" value={`${stats.winRate}%`} icon="🎯" color={stats.winRate >= 50 ? 'profit' : 'loss'} />
-                  <DashboardCard title="Total Trades" value={String(stats.totalTrades)} icon="📊" />
-                  <DashboardCard title="Avg R:R" value={`${stats.avgRR}R`} icon="⚖️" />
-                  <DashboardCard title="Rule Following" value={`${stats.ruleFollowingPct}%`} icon="✅" color={stats.ruleFollowingPct >= 70 ? 'profit' : 'neutral'} />
-                  <DashboardCard title="Wins" value={String(stats.totalWins)} color="profit" icon="✅" />
-                  <DashboardCard title="Losses" value={String(stats.totalLosses)} color="loss" icon="❌" />
-                  <DashboardCard title="Breakeven" value={String(stats.totalBreakeven)} color="neutral" icon="〰️" />
+                {/* Stat cards */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+                  gap: '0.75rem',
+                  marginBottom: '1.5rem',
+                }}>
+                  <StatCard
+                    title="Total P&L"
+                    value={formatPL(stats.totalPL)}
+                    color={stats.totalPL > 0 ? '#10b981' : stats.totalPL < 0 ? '#ef4444' : undefined}
+                    icon="💰"
+                  />
+                  <StatCard
+                    title="Win Rate"
+                    value={`${stats.winRate}%`}
+                    color={stats.winRate >= 50 ? '#10b981' : '#ef4444'}
+                    icon="🎯"
+                  />
+                  <StatCard title="Total Trades" value={String(stats.totalTrades)} icon="📊" />
+                  <StatCard title="Wins" value={String(stats.totalWins)} color="#10b981" icon="✅" />
+                  <StatCard title="Losses" value={String(stats.totalLosses)} color="#ef4444" icon="❌" />
+                  <StatCard title="Breakeven" value={String(stats.totalBreakeven)} color="#f59e0b" icon="〰️" />
                 </div>
 
+                {/* Best / Worst */}
                 {(stats.bestTrade || stats.worstTrade) && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
                     {stats.bestTrade && (
-                      <Link href={`/trades/${stats.bestTrade.id}`} className="card p-4 card-glow border-emerald-500/20 hover:border-emerald-500/40 transition-colors">
-                        <div className="text-xs text-emerald-400 font-medium uppercase tracking-wider mb-1">🏆 Best Trade</div>
-                        <div className="font-bold text-white">{stats.bestTrade.pair}</div>
-                        <div className="text-emerald-400 num text-lg font-bold">{formatPL(stats.bestTrade.profit_loss)}</div>
-                        <div className="text-xs text-[#8888a0]">{stats.bestTrade.trade_date} · {stats.bestTrade.setup_type}</div>
+                      <Link href={`/trades/${stats.bestTrade.id}`} style={{
+                        backgroundColor: '#16161f', border: '1px solid rgba(16,185,129,0.2)',
+                        borderRadius: '0.75rem', padding: '1rem', textDecoration: 'none', display: 'block',
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 500, marginBottom: '0.25rem' }}>🏆 Best Trade</div>
+                        <div style={{ fontSize: '1.125rem', fontWeight: 700, color: '#10b981', fontFamily: 'monospace' }}>
+                          {formatPL((() => {
+                            const keys = ['Profit / Loss ($)', 'profit_loss', 'PL']
+                            for (const k of keys) { if (stats.bestTrade!.data[k] !== undefined) return parseFloat(stats.bestTrade!.data[k]) || 0 }
+                            return 0
+                          })())}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#555570', marginTop: '0.25rem' }}>
+                          {new Date(stats.bestTrade.created_at).toLocaleDateString()}
+                        </div>
                       </Link>
                     )}
                     {stats.worstTrade && (
-                      <Link href={`/trades/${stats.worstTrade.id}`} className="card p-4 card-glow border-red-500/20 hover:border-red-500/40 transition-colors">
-                        <div className="text-xs text-red-400 font-medium uppercase tracking-wider mb-1">📉 Worst Trade</div>
-                        <div className="font-bold text-white">{stats.worstTrade.pair}</div>
-                        <div className="text-red-400 num text-lg font-bold">{formatPL(stats.worstTrade.profit_loss)}</div>
-                        <div className="text-xs text-[#8888a0]">{stats.worstTrade.trade_date} · {stats.worstTrade.setup_type}</div>
+                      <Link href={`/trades/${stats.worstTrade.id}`} style={{
+                        backgroundColor: '#16161f', border: '1px solid rgba(239,68,68,0.2)',
+                        borderRadius: '0.75rem', padding: '1rem', textDecoration: 'none', display: 'block',
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 500, marginBottom: '0.25rem' }}>📉 Worst Trade</div>
+                        <div style={{ fontSize: '1.125rem', fontWeight: 700, color: '#ef4444', fontFamily: 'monospace' }}>
+                          {formatPL((() => {
+                            const keys = ['Profit / Loss ($)', 'profit_loss', 'PL']
+                            for (const k of keys) { if (stats.worstTrade!.data[k] !== undefined) return parseFloat(stats.worstTrade!.data[k]) || 0 }
+                            return 0
+                          })())}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#555570', marginTop: '0.25rem' }}>
+                          {new Date(stats.worstTrade.created_at).toLocaleDateString()}
+                        </div>
                       </Link>
                     )}
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {monthly.length > 0 && (
-                    <div className="card p-5">
-                      <h3 className="text-sm font-semibold text-white mb-4">Monthly P&L</h3>
-                      <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={monthly}>
-                          <XAxis dataKey="month" tick={{ fill: '#8888a0', fontSize: 11 }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fill: '#8888a0', fontSize: 11 }} axisLine={false} tickLine={false} />
-                          <Tooltip contentStyle={{ backgroundColor: '#16161f', border: '1px solid #1f1f2e', borderRadius: 8, fontSize: 12 }} />
-                          <Bar dataKey="pl" radius={[4,4,0,0]}>{monthly.map((e,i) => <Cell key={i} fill={plColor(e.pl)} />)}</Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-                  {pairPerf.length > 0 && (
-                    <div className="card p-5">
-                      <h3 className="text-sm font-semibold text-white mb-4">Performance by Pair</h3>
-                      <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={pairPerf} layout="vertical">
-                          <XAxis type="number" tick={{ fill: '#8888a0', fontSize: 11 }} axisLine={false} tickLine={false} />
-                          <YAxis dataKey="pair" type="category" tick={{ fill: '#8888a0', fontSize: 11 }} axisLine={false} tickLine={false} />
-                          <Tooltip contentStyle={{ backgroundColor: '#16161f', border: '1px solid #1f1f2e', borderRadius: 8, fontSize: 12 }} />
-                          <Bar dataKey="pl" radius={[0,4,4,0]}>{pairPerf.map((e,i) => <Cell key={i} fill={plColor(e.pl)} />)}</Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-                </div>
-
-                {setupPerf.length > 0 && (
-                  <div className="card p-5">
-                    <h3 className="text-sm font-semibold text-white mb-4">Performance by Setup</h3>
-                    <div className="overflow-x-auto">
-                      <table className="data-table w-full min-w-[400px]">
-                        <thead><tr><th>Setup</th><th>Trades</th><th>Win Rate</th><th>Total P&L</th></tr></thead>
-                        <tbody>
-                          {setupPerf.map(s => (
-                            <tr key={s.setup}>
-                              <td className="font-medium text-white">{s.setup}</td>
-                              <td className="text-[#8888a0]">{s.count}</td>
-                              <td className={s.winRate >= 50 ? 'text-emerald-400' : 'text-red-400'}>{s.winRate}%</td>
-                              <td className={`num font-semibold ${s.pl > 0 ? 'text-emerald-400' : s.pl < 0 ? 'text-red-400' : 'text-[#8888a0]'}`}>{formatPL(s.pl)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                {/* Monthly chart */}
+                {monthly.length > 0 && (
+                  <div style={{
+                    backgroundColor: '#16161f', border: '1px solid #1f1f2e',
+                    borderRadius: '0.75rem', padding: '1.25rem', marginBottom: '1.5rem',
+                  }}>
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'white', marginBottom: '1rem' }}>Monthly P&L</h3>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={monthly}>
+                        <XAxis dataKey="month" tick={{ fill: '#8888a0', fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: '#8888a0', fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <Tooltip contentStyle={{ backgroundColor: '#16161f', border: '1px solid #1f1f2e', borderRadius: 8, fontSize: 12 }} />
+                        <Bar dataKey="pl" radius={[4, 4, 0, 0]}>
+                          {monthly.map((e, i) => <Cell key={i} fill={plColor(e.pl)} />)}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 )}
 
-                <div className="card p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold text-white">Recent Trades</h3>
-                    <Link href="/trades/history" className="text-xs text-blue-400 hover:text-blue-300">View all →</Link>
+                {/* Recent trades */}
+                <div style={{
+                  backgroundColor: '#16161f', border: '1px solid #1f1f2e',
+                  borderRadius: '0.75rem', padding: '1.25rem',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'white' }}>Recent Trades</h3>
+                    <Link href="/trades/history" style={{ fontSize: '0.75rem', color: '#60a5fa', textDecoration: 'none' }}>View all →</Link>
                   </div>
-                  <div className="space-y-2">
-                    {trades.slice(0,5).map(t => (
-                      <Link key={t.id} href={`/trades/${t.id}`} className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-[#1e1e2a] transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-1.5 h-8 rounded-full ${t.result === 'Win' ? 'bg-emerald-500' : t.result === 'Loss' ? 'bg-red-500' : 'bg-amber-500'}`} />
-                          <div>
-                            <div className="text-sm font-semibold text-white">{t.pair}</div>
-                            <div className="text-xs text-[#8888a0]">{t.trade_date} · {t.session}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    {trades.slice(0, 5).map(t => {
+                      const plVal = (() => {
+                        const keys = ['Profit / Loss ($)', 'profit_loss', 'PL', 'P&L']
+                        for (const k of keys) { if (t.data[k] !== undefined) return parseFloat(t.data[k]) || 0 }
+                        return 0
+                      })()
+                      const resultVal = t.data['Result'] || t.data['result'] || ''
+                      const isWin = String(resultVal).toLowerCase().includes('win')
+                      const isLoss = String(resultVal).toLowerCase().includes('loss')
+                      const barColor = isWin ? '#10b981' : isLoss ? '#ef4444' : '#f59e0b'
+                      const pair = t.data['Pair'] || t.data['pair'] || 'Trade'
+                      const date = t.data['Trade Date'] || t.data['Date'] || new Date(t.created_at).toLocaleDateString()
+
+                      return (
+                        <Link key={t.id} href={`/trades/${t.id}`} style={{
+                          display: 'flex', alignItems: 'center', gap: '0.75rem',
+                          padding: '0.625rem 0.75rem', borderRadius: '0.5rem',
+                          textDecoration: 'none', transition: 'background 0.15s',
+                        }}
+                          onMouseOver={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#1e1e2a'}
+                          onMouseOut={e => (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent'}
+                        >
+                          <div style={{ width: '0.25rem', height: '2rem', borderRadius: '9999px', backgroundColor: barColor, flexShrink: 0 }} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'white' }}>{pair}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#8888a0' }}>{date}</div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`num font-semibold text-sm ${t.profit_loss > 0 ? 'text-emerald-400' : t.profit_loss < 0 ? 'text-red-400' : 'text-[#8888a0]'}`}>{formatPL(t.profit_loss)}</div>
-                          <div className="text-xs text-[#555570]">{t.setup_type}</div>
-                        </div>
-                      </Link>
-                    ))}
+                          <div style={{
+                            fontSize: '0.875rem', fontWeight: 600, fontFamily: 'monospace',
+                            color: plVal > 0 ? '#10b981' : plVal < 0 ? '#ef4444' : '#8888a0',
+                          }}>
+                            {formatPL(plVal)}
+                          </div>
+                        </Link>
+                      )
+                    })}
                   </div>
                 </div>
               </>

@@ -16,6 +16,7 @@ const FIELD_TYPES: { value: FieldType; label: string; icon: string; desc: string
   { value: 'date',        label: 'Date',         icon: '📅', desc: 'Date picker' },
   { value: 'checkbox',    label: 'Checkbox',     icon: '✅', desc: 'Yes / No toggle' },
   { value: 'textarea',    label: 'Text Area',    icon: '📄', desc: 'Long text / notes' },
+  { value: 'screenshot',  label: 'Screenshot',   icon: '📸', desc: 'Upload chart images' },
 ]
 
 export default function FieldBuilderModal({ field, onSave, onClose }: Props) {
@@ -63,13 +64,10 @@ export default function FieldBuilderModal({ field, onSave, onClose }: Props) {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '1rem',
     }}>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
-      />
-
-      {/* Modal */}
+      <div onClick={onClose} style={{
+        position: 'absolute', inset: 0,
+        backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+      }} />
       <div style={{
         position: 'relative', zIndex: 10,
         backgroundColor: '#16161f', border: '1px solid #1f1f2e',
@@ -77,35 +75,51 @@ export default function FieldBuilderModal({ field, onSave, onClose }: Props) {
         width: '100%', maxWidth: '500px',
         maxHeight: '90vh', overflowY: 'auto',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', marginBottom: '1.25rem',
+        }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'white' }}>
             {field ? 'Edit Field' : 'Add New Field'}
           </h2>
-          <button onClick={onClose} style={{ color: '#8888a0', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem' }}>✕</button>
+          <button onClick={onClose} style={{
+            color: '#8888a0', background: 'none', border: 'none',
+            cursor: 'pointer', fontSize: '1.25rem',
+          }}>✕</button>
         </div>
 
         {error && (
-          <div style={{ backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '0.5rem', padding: '0.75rem', color: '#f87171', fontSize: '0.875rem', marginBottom: '1rem' }}>
-            {error}
-          </div>
+          <div style={{
+            backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+            borderRadius: '0.5rem', padding: '0.75rem', color: '#f87171',
+            fontSize: '0.875rem', marginBottom: '1rem',
+          }}>{error}</div>
         )}
 
         {/* Field Name */}
         <div style={{ marginBottom: '1rem' }}>
-          <label className="form-label">Field Name</label>
+          <label style={{
+            display: 'block', fontSize: '0.75rem', fontWeight: 500,
+            color: '#8888a0', marginBottom: '0.375rem',
+            textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>Field Name</label>
           <input
             type="text"
             className="form-input"
             value={name}
             onChange={e => setName(e.target.value)}
-            placeholder="e.g. Pair, Session, Notes..."
+            placeholder="e.g. HTF Chart, Entry Screenshot..."
             autoFocus
           />
         </div>
 
         {/* Field Type */}
         <div style={{ marginBottom: '1rem' }}>
-          <label className="form-label">Field Type</label>
+          <label style={{
+            display: 'block', fontSize: '0.75rem', fontWeight: 500,
+            color: '#8888a0', marginBottom: '0.375rem',
+            textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>Field Type</label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
             {FIELD_TYPES.map(ft => (
               <button
@@ -113,29 +127,35 @@ export default function FieldBuilderModal({ field, onSave, onClose }: Props) {
                 type="button"
                 onClick={() => { setType(ft.value); setError('') }}
                 style={{
-                  padding: '0.625rem 0.75rem',
-                  borderRadius: '0.5rem',
-                  border: type === ft.value ? '1px solid rgba(59,130,246,0.5)' : '1px solid #1f1f2e',
-                  backgroundColor: type === ft.value ? 'rgba(59,130,246,0.1)' : '#111118',
+                  padding: '0.625rem 0.75rem', borderRadius: '0.5rem',
+                  border: type === ft.value
+                    ? '1px solid rgba(59,130,246,0.5)'
+                    : '1px solid #1f1f2e',
+                  backgroundColor: type === ft.value
+                    ? 'rgba(59,130,246,0.1)' : '#111118',
                   color: type === ft.value ? '#60a5fa' : '#8888a0',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s',
+                  cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
                 }}
               >
-                <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{ft.icon} {ft.label}</div>
-                <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.125rem' }}>{ft.desc}</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                  {ft.icon} {ft.label}
+                </div>
+                <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '0.125rem' }}>
+                  {ft.desc}
+                </div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Options (for dropdown / multiselect) */}
+        {/* Options for dropdown/multiselect */}
         {needsOptions && (
           <div style={{ marginBottom: '1rem' }}>
-            <label className="form-label">Options</label>
-
-            {/* Existing options */}
+            <label style={{
+              display: 'block', fontSize: '0.75rem', fontWeight: 500,
+              color: '#8888a0', marginBottom: '0.375rem',
+              textTransform: 'uppercase', letterSpacing: '0.05em',
+            }}>Options</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '0.5rem' }}>
               {options.map(opt => (
                 <span key={opt} style={{
@@ -148,7 +168,10 @@ export default function FieldBuilderModal({ field, onSave, onClose }: Props) {
                   <button
                     type="button"
                     onClick={() => removeOption(opt)}
-                    style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', padding: 0, lineHeight: 1 }}
+                    style={{
+                      color: '#f87171', background: 'none', border: 'none',
+                      cursor: 'pointer', fontSize: '0.75rem', padding: 0, lineHeight: 1,
+                    }}
                   >✕</button>
                 </span>
               ))}
@@ -156,8 +179,6 @@ export default function FieldBuilderModal({ field, onSave, onClose }: Props) {
                 <span style={{ fontSize: '0.75rem', color: '#555570' }}>No options yet</span>
               )}
             </div>
-
-            {/* Add option input */}
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <input
                 type="text"
@@ -172,14 +193,23 @@ export default function FieldBuilderModal({ field, onSave, onClose }: Props) {
                 onClick={addOption}
                 className="btn-secondary"
                 style={{ whiteSpace: 'nowrap' }}
-              >
-                + Add
-              </button>
+              >+ Add</button>
             </div>
           </div>
         )}
 
-        {/* Actions */}
+        {/* Screenshot info */}
+        {type === 'screenshot' && (
+          <div style={{
+            padding: '0.75rem', backgroundColor: 'rgba(59,130,246,0.05)',
+            border: '1px solid rgba(59,130,246,0.15)', borderRadius: '0.5rem',
+            fontSize: '0.8125rem', color: '#8888a0', marginBottom: '1rem',
+          }}>
+            📸 This field will show an image upload button in your trade form.
+            You can upload up to 5 images per field.
+          </div>
+        )}
+
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1.25rem' }}>
           <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
           <button type="button" onClick={handleSave} className="btn-primary">

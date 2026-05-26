@@ -10,6 +10,7 @@ export type FieldType =
   | 'date'
   | 'checkbox'
   | 'textarea'
+  | 'screenshot'
 
 export interface Field {
   id: string

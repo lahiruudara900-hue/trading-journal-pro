@@ -17,12 +17,13 @@ export function findField(fields: Field[], name: string): Field | undefined {
 // ============================================================
 // Calculate R:R automatically
 // ============================================================
-export function calculateRR(entry: number, sl: number, tp: number): number {
-  if (!entry || !sl || !tp) return 0
+export function calculateRR(entry: number, sl: number, tp: number): string {
+  if (!entry || !sl || !tp) return ''
   const risk = Math.abs(entry - sl)
   const reward = Math.abs(tp - entry)
-  if (risk === 0) return 0
-  return Math.round((reward / risk) * 100) / 100
+  if (risk === 0) return ''
+  const ratio = Math.round((reward / risk) * 100) / 100
+  return `1:${ratio}`
 }
 
 // ============================================================
