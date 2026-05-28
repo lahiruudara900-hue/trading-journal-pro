@@ -1,47 +1,24 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import Sidebar from '@/components/Sidebar'
 import { getSupabaseClient } from '@/lib/supabase'
-
-interface Settings {
-  account_name: string
-  account_size: number
-  risk_per_trade: number
-  instruments: string[]
-  protocols: string[]
-  rules: string[]
-}
-
-const DEFAULT_SETTINGS: Settings = {
-  account_name: 'My Account',
-  account_size: 0,
-  risk_per_trade: 1,
-  instruments: [],
-  protocols: [],
-  rules: [],
-}
 
 export default function SettingsPage() {
   const router = useRouter()
   const [userId, setUserId] = useState('')
   const [email, setEmail] = useState('')
   const [settingsId, setSettingsId] = useState<string | null>(null)
-  const [settings, setSettings] = useState<Settings>({ ...DEFAULT_SETTINGS })
+  const [accountName, setAccountName] = useState('My Account')
+  const [accountSize, setAccountSize] = useState(0)
+  const [riskPerTrade, setRiskPerTrade] = useState(1)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-
-  // Password change
+  const [pwSaving, setPwSaving] = useState(false)
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [pwSaving, setPwSaving] = useState(false)
-
-  // List inputs
-  const [newInstrument, setNewInstrument] = useState('')
-  const [newProtocol, setNewProtocol] = useState('')
-  const [newRule, setNewRule] = useState('')
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text })
@@ -55,19 +32,13 @@ export default function SettingsPage() {
       if (!user) return
       setUserId(user.id)
       setEmail(user.email || '')
-
       const { data } = await supabase
         .from('user_settings').select('*').eq('user_id', user.id).single()
       if (data) {
         setSettingsId(data.id)
-        setSettings({
-          account_name: data.account_name || 'My Account',
-          account_size: data.account_size || 0,
-          risk_per_trade: data.risk_per_trade || 1,
-          instruments: data.instruments || [],
-          protocols: data.protocols || [],
-          rules: data.rules || [],
-        })
+        setAccountName(data.account_name || 'My Account')
+        setAccountSize(data.account_size || 0)
+        setRiskPerTrade(data.risk_per_trade || 1)
       }
       setLoading(false)
     }
@@ -77,13 +48,18 @@ export default function SettingsPage() {
   async function handleSaveSettings() {
     setSaving(true)
     const supabase = getSupabaseClient()
+    const payload = {
+      account_name: accountName,
+      account_size: accountSize,
+      risk_per_trade: riskPerTrade,
+    }
     if (settingsId) {
       await supabase.from('user_settings')
-        .update({ ...settings, updated_at: new Date().toISOString() })
+        .update({ ...payload, updated_at: new Date().toISOString() })
         .eq('user_id', userId)
     } else {
       const { data } = await supabase.from('user_settings')
-        .insert([{ ...settings, user_id: userId }]).select().single()
+        .insert([{ ...payload, user_id: userId }]).select().single()
       if (data) setSettingsId(data.id)
     }
     setSaving(false)
@@ -117,73 +93,18 @@ export default function SettingsPage() {
     router.push('/')
   }
 
-  // List helpers
-  function addItem(key: 'instruments' | 'protocols' | 'rules', value: string) {
-    const v = value.trim()
-    if (!v || settings[key].includes(v)) return
-    setSettings(s => ({ ...s, [key]: [...s[key], v] }))
-  }
-  function removeItem(key: 'instruments' | 'protocols' | 'rules', value: string) {
-    setSettings(s => ({ ...s, [key]: s[key].filter(i => i !== value) }))
-  }
-
-  const ListManager = ({
-    title, items, newVal, setNewVal, onAdd, onRemove, placeholder,
-  }: {
-    title: string; items: string[]; newVal: string
-    setNewVal: (v: string) => void; onAdd: () => void
-    onRemove: (v: string) => void; placeholder: string
-  }) => (
-    <div className="card" style={{ marginBottom: '12px' }}>
-      <div className="section-title">{title}</div>
-      <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '8px' }}>
-        {items.length === 0 ? (
-          <div style={{ fontSize: '12.5px', color: 'var(--text3)', padding: '8px 0' }}>None added yet.</div>
-        ) : items.map(item => (
-          <div key={item} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '7px 10px', background: 'var(--bg3)', borderRadius: 'var(--radius)',
-            marginBottom: '4px', border: '1px solid var(--border)',
-          }}>
-            <span style={{ fontSize: '13px', fontFamily: title === 'Instruments' ? 'var(--mono)' : 'inherit' }}>{item}</span>
-            <button onClick={() => onRemove(item)} style={{
-              background: 'none', border: 'none', color: 'var(--text3)',
-              cursor: 'pointer', fontSize: '13px', padding: '0 4px',
-              lineHeight: 1,
-            }}
-              onMouseOver={e => (e.currentTarget as HTMLButtonElement).style.color = 'var(--red)'}
-              onMouseOut={e => (e.currentTarget as HTMLButtonElement).style.color = 'var(--text3)'}
-            >✕</button>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <input
-          className="form-input" style={{ flex: 1 }}
-          value={newVal} onChange={e => setNewVal(e.target.value)}
-          placeholder={placeholder}
-          onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), onAdd())}
-        />
-        <button onClick={onAdd} className="btn btn-primary btn-sm" style={{ whiteSpace: 'nowrap' }}>
-          + Add
-        </button>
-      </div>
-    </div>
-  )
-
   return (
     <ProtectedRoute>
       <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
         <Sidebar />
         <main style={{ flex: 1, paddingTop: '48px', overflowY: 'auto', minHeight: '100vh' }}
           className="md:ml-[190px] md:pt-0">
-          <div style={{ padding: '24px 28px', maxWidth: '700px', margin: '0 auto' }}>
+          <div style={{ padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }}>
 
-            {/* Header */}
             <div className="page-header">
               <div>
                 <div className="page-title">Settings</div>
-                <div className="page-subtitle">Account, system, and preferences</div>
+                <div className="page-subtitle">Account and preferences</div>
               </div>
             </div>
 
@@ -203,10 +124,10 @@ export default function SettingsPage() {
               </div>
             ) : (
               <>
-                {/* Profile card */}
+                {/* Profile */}
                 <div className="card" style={{ marginBottom: '12px' }}>
                   <div className="section-title">Profile</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <div style={{
                       width: '44px', height: '44px', borderRadius: '50%',
                       background: 'rgba(0,212,170,0.15)', border: '1px solid rgba(0,212,170,0.3)',
@@ -226,25 +147,27 @@ export default function SettingsPage() {
                 {/* Account settings */}
                 <div className="card" style={{ marginBottom: '12px' }}>
                   <div className="section-title">Account Settings</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
-                    <div style={{ gridColumn: '1 / -1' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '14px' }}>
+                    <div>
                       <label className="form-label">Account Name</label>
-                      <input className="form-input" value={settings.account_name}
-                        onChange={e => setSettings(s => ({ ...s, account_name: e.target.value }))} />
+                      <input className="form-input" value={accountName}
+                        onChange={e => setAccountName(e.target.value)} />
                     </div>
-                    <div>
-                      <label className="form-label">Account Size ($)</label>
-                      <input type="number" className="form-input"
-                        value={settings.account_size || ''}
-                        onChange={e => setSettings(s => ({ ...s, account_size: parseFloat(e.target.value) || 0 }))}
-                        placeholder="e.g. 10000" />
-                    </div>
-                    <div>
-                      <label className="form-label">Risk Per Trade (%)</label>
-                      <input type="number" step="0.1" className="form-input"
-                        value={settings.risk_per_trade || ''}
-                        onChange={e => setSettings(s => ({ ...s, risk_per_trade: parseFloat(e.target.value) || 0 }))}
-                        placeholder="e.g. 1" />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label className="form-label">Account Size ($)</label>
+                        <input type="number" className="form-input"
+                          value={accountSize || ''}
+                          onChange={e => setAccountSize(parseFloat(e.target.value) || 0)}
+                          placeholder="e.g. 10000" />
+                      </div>
+                      <div>
+                        <label className="form-label">Risk Per Trade (%)</label>
+                        <input type="number" step="0.1" className="form-input"
+                          value={riskPerTrade || ''}
+                          onChange={e => setRiskPerTrade(parseFloat(e.target.value) || 0)}
+                          placeholder="e.g. 1" />
+                      </div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -254,46 +177,6 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Instruments */}
-                <ListManager
-                  title="Instruments"
-                  items={settings.instruments}
-                  newVal={newInstrument}
-                  setNewVal={setNewInstrument}
-                  onAdd={() => { addItem('instruments', newInstrument); setNewInstrument('') }}
-                  onRemove={v => removeItem('instruments', v)}
-                  placeholder="e.g. EURUSD, NAS100, XAUUSD…"
-                />
-
-                {/* Protocols / Setups */}
-                <ListManager
-                  title="Protocols / Setups"
-                  items={settings.protocols}
-                  newVal={newProtocol}
-                  setNewVal={setNewProtocol}
-                  onAdd={() => { addItem('protocols', newProtocol); setNewProtocol('') }}
-                  onRemove={v => removeItem('protocols', v)}
-                  placeholder="e.g. Silver Bullet, FVG, OTE…"
-                />
-
-                {/* Trading Rules */}
-                <ListManager
-                  title="Trading Rules Checklist"
-                  items={settings.rules}
-                  newVal={newRule}
-                  setNewVal={setNewRule}
-                  onAdd={() => { addItem('rules', newRule); setNewRule('') }}
-                  onRemove={v => removeItem('rules', v)}
-                  placeholder="e.g. Only trade during Kill Zones…"
-                />
-
-                {/* Save system settings */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
-                  <button onClick={handleSaveSettings} disabled={saving} className="btn btn-primary">
-                    {saving ? 'Saving…' : 'Save All Settings'}
-                  </button>
-                </div>
-
                 {/* Change password */}
                 <div className="card" style={{ marginBottom: '12px' }}>
                   <div className="section-title">Change Password</div>
@@ -301,12 +184,14 @@ export default function SettingsPage() {
                     <div>
                       <label className="form-label">New Password</label>
                       <input type="password" className="form-input" value={newPassword}
-                        onChange={e => setNewPassword(e.target.value)} placeholder="Min. 6 characters" required />
+                        onChange={e => setNewPassword(e.target.value)}
+                        placeholder="Min. 6 characters" required />
                     </div>
                     <div>
                       <label className="form-label">Confirm Password</label>
                       <input type="password" className="form-input" value={confirmPassword}
-                        onChange={e => setConfirmPassword(e.target.value)} placeholder="Repeat password" required />
+                        onChange={e => setConfirmPassword(e.target.value)}
+                        placeholder="Repeat password" required />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                       <button type="submit" className="btn btn-primary btn-sm" disabled={pwSaving}>
