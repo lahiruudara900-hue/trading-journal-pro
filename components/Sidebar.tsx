@@ -10,6 +10,7 @@ const navItems = [
   { href: '/trades/add',      label: 'Log Trade',        icon: '➕' },
   { href: '/trades/history',  label: 'Trade History',    icon: '📊' },
   { href: '/reflections',     label: 'Reflections',      icon: '🪞' },
+  { href: '/study',           label: 'Study',            icon: '📚' },
   { href: '/fields',          label: 'Field Builder',    icon: '🧩' },
   { href: '/settings',        label: 'Settings',         icon: '⚙️' },
 ]
