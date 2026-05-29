@@ -73,7 +73,8 @@ export default function Sidebar() {
               onClick={() => setMobileOpen(false)}
               style={{
                 display: 'flex', alignItems: 'center',
-                gap: '10px', padding: '9px 14px',
+                gap: '10px', padding: '11px 14px',
+                minHeight: '44px',
                 cursor: 'pointer', textDecoration: 'none',
                 color: active ? 'var(--accent)' : 'var(--text2)',
                 fontSize: '13px', transition: 'all 0.15s',

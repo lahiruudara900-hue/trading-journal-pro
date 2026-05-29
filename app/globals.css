@@ -367,3 +367,61 @@ html, body {
 .space-y-2 > * + * { margin-top: 0.5rem; }
 .space-y-3 > * + * { margin-top: 0.75rem; }
 .space-y-4 > * + * { margin-top: 1rem; }
+
+/* ══════════════════════════════════════════════
+   MOBILE IMPROVEMENTS
+══════════════════════════════════════════════ */
+
+/* Hide desktop sidebar on mobile */
+@media (max-width: 767px) {
+  /* Main content fills full width on mobile */
+  .md\:ml-\[190px\] { margin-left: 0 !important; }
+  .md\:pt-0 { padding-top: 48px !important; }
+
+  /* Tighter page padding on mobile */
+  .page-header { margin-bottom: 16px; }
+  .page-title { font-size: 16px; }
+  .page-subtitle { font-size: 11px; }
+
+  /* Stat cards wrap nicely */
+  .stat-card { min-width: 100px; padding: 10px 12px; }
+  .stat-value { font-size: 16px; }
+  .stat-label { font-size: 9.5px; }
+
+  /* Cards full width */
+  .card { border-radius: 4px; }
+
+  /* Tables scroll horizontally */
+  .data-table { font-size: 12px; }
+  .data-table thead th { padding: 8px 10px; font-size: 9.5px; }
+  .data-table tbody td { padding: 8px 10px; }
+
+  /* Buttons smaller */
+  .btn { padding: 6px 12px; font-size: 12px; }
+  .btn-sm { padding: 4px 8px; font-size: 11px; }
+
+  /* Filter bar wraps */
+  .filter-bar { gap: 4px; margin-bottom: 12px; }
+  .filter-btn { padding: 4px 10px; font-size: 11px; }
+
+  /* Form inputs full width */
+  .form-input, .form-select { font-size: 16px; } /* prevents iOS zoom */
+
+  /* Side panels full width on mobile */
+  .side-panel-mobile { width: 100vw !important; }
+
+  /* Reduce padding in cards */
+  .card { padding: 12px; }
+
+  /* Section title smaller */
+  .section-title { font-size: 9.5px; margin-bottom: 10px; }
+
+  /* Empty state tighter */
+  .empty-state { padding: 40px 16px; }
+  .empty-state .es-icon { font-size: 28px; }
+}
+
+/* ── Tablet ───────────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .stat-card { min-width: 110px; }
+}

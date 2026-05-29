@@ -408,7 +408,7 @@ export default function PremarketPage() {
           <div onClick={() => setShowPlanForm(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
           <div style={{
             position: 'relative', zIndex: 10,
-            width: 'min(520px, 95vw)', height: '100vh',
+            wwidth: 'min(520px, 100vw)', height: '100vh',
             background: 'var(--bg2)', borderLeft: '1px solid var(--border)',
             display: 'flex', flexDirection: 'column',
             animation: 'slideIn 0.3s ease',
