@@ -143,13 +143,25 @@ export default function Sidebar() {
 
       {/* Mobile top bar */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        display: 'flex', alignItems: 'center', gap: '10px',
         padding: '0 16px', height: '48px',
         background: 'var(--bg2)', borderBottom: '1px solid var(--border)',
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
       }}
         className="md:hidden"
       >
+        {/* Hamburger on the LEFT */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          style={{
+            background: 'none', border: 'none', color: 'var(--text2)',
+            cursor: 'pointer', fontSize: '18px', padding: '4px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            minWidth: '32px',
+          }}
+        >{mobileOpen ? '✕' : '☰'}</button>
+
+        {/* Logo + title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{
             width: '24px', height: '24px',
@@ -159,26 +171,7 @@ export default function Sidebar() {
           }}>TJ</div>
           <span style={{ fontSize: '13px', fontWeight: 600 }}>Trading Journal</span>
         </div>
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          style={{ background: 'none', border: 'none', color: 'var(--text2)', cursor: 'pointer', fontSize: '18px' }}
-        >{mobileOpen ? '✕' : '☰'}</button>
       </div>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200 }} onClick={() => setMobileOpen(false)}>
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
-          <aside
-            style={{
-              position: 'absolute', top: 0, left: 0, bottom: 0, width: '190px',
-              background: 'var(--bg2)', borderRight: '1px solid var(--border)', zIndex: 201,
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            <Content />
-          </aside>
-        </div>
       )}
     </>
   )
