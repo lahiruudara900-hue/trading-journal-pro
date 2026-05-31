@@ -172,7 +172,6 @@ export default function Sidebar() {
           <span style={{ fontSize: '13px', fontWeight: 600 }}>Trading Journal</span>
         </div>
       </div>
-      )}
     </>
   )
 }
