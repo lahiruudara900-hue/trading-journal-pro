@@ -5,14 +5,13 @@ import { usePathname, useRouter } from 'next/navigation'
 import { getSupabaseClient } from '@/lib/supabase'
 
 const navItems = [
-  { href: '/dashboard',       label: 'Dashboard',       icon: '⬛' },
-  { href: '/premarket',       label: 'Pre-Market Plan',  icon: '📋' },
-  { href: '/trades/add',      label: 'Log Trade',        icon: '➕' },
-  { href: '/trades/history',  label: 'Trade History',    icon: '📊' },
-  { href: '/reflections',     label: 'Reflections',      icon: '🪞' },
-  { href: '/study',           label: 'Study',            icon: '📚' },
-  { href: '/fields',          label: 'Field Builder',    icon: '🧩' },
-  { href: '/settings',        label: 'Settings',         icon: '⚙️' },
+  { href: '/dashboard',      label: 'Dashboard',      icon: '⬛' },
+  { href: '/premarket',      label: 'Pre-Market Plan', icon: '📋' },
+  { href: '/trades/add',     label: 'Log Trade',       icon: '➕' },
+  { href: '/trades/history', label: 'Trade History',   icon: '📊' },
+  { href: '/reflections',    label: 'Reflections',     icon: '🪞' },
+  { href: '/study',          label: 'Study',           icon: '📚' },
+  { href: '/settings',       label: 'Settings',        icon: '⚙️' },
 ]
 
 export default function Sidebar() {
