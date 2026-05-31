@@ -166,34 +166,24 @@ export default function AddTradePage() {
             {/* Header */}
             <div className="page-header">
               <div>
-                <div className="page-title">Trade Journal</div>
-                <div className="page-subtitle">Log trades and manage your journal fields</div>
+                <div className="page-title">
+                  {tab === 'log' ? 'Log Trade' : 'Manage Fields'}
+                </div>
+                <div className="page-subtitle">
+                  {tab === 'log' ? 'Record your trade details' : 'Add, edit, and reorder your trade fields'}
+                </div>
               </div>
-              <Link href="/trades/history" className="btn btn-secondary">View History</Link>
-            </div>
-
-            {/* Tabs */}
-            <div style={{
-              display: 'flex', gap: '0',
-              borderBottom: '1px solid var(--border)',
-              marginBottom: '24px',
-            }}>
-              {[
-                { key: 'log', label: '➕ Log Trade' },
-                { key: 'fields', label: '🧩 Manage Fields' },
-              ].map(t => (
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  key={t.key}
-                  onClick={() => setTab(t.key as Tab)}
-                  style={{
-                    padding: '10px 18px', fontSize: '13px', fontWeight: 500,
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: tab === t.key ? 'var(--accent)' : 'var(--text3)',
-                    borderBottom: tab === t.key ? '2px solid var(--accent)' : '2px solid transparent',
-                    marginBottom: '-1px', transition: 'all 0.15s',
-                  }}
-                >{t.label}</button>
-              ))}
+                  onClick={() => setTab(tab === 'log' ? 'fields' : 'log')}
+                  className="btn btn-secondary"
+                >
+                  {tab === 'log' ? '🧩 Manage Fields' : '➕ Log Trade'}
+                </button>
+                {tab === 'log' && (
+                  <Link href="/trades/history" className="btn btn-ghost">History</Link>
+                )}
+              </div>
             </div>
 
             {/* Message */}
