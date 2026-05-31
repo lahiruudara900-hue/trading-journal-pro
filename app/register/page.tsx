@@ -27,35 +27,113 @@ export default function RegisterPage() {
   }
 
   if (success) return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
-      <div className="card p-8 max-w-md w-full text-center">
-        <div className="text-4xl mb-4">✉️</div>
-        <h2 className="text-xl font-bold text-white mb-2">Check your email</h2>
-        <p className="text-[#8888a0] text-sm">We sent a confirmation link to <strong className="text-white">{email}</strong>. Click it then <Link href="/login" className="text-blue-400">sign in</Link>.</p>
+    <div style={{
+      minHeight: '100vh', background: 'var(--bg)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+    }}>
+      <div style={{
+        background: 'var(--bg2)', border: '1px solid var(--border)',
+        borderRadius: '6px', padding: '32px', maxWidth: '360px', width: '100%', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>✉️</div>
+        <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>Check your email</h2>
+        <p style={{ fontSize: '13px', color: 'var(--text3)', lineHeight: 1.6 }}>
+          We sent a confirmation link to{' '}
+          <strong style={{ color: 'var(--text)' }}>{email}</strong>.
+          Click it to activate your account, then{' '}
+          <Link href="/login" style={{ color: 'var(--accent)', textDecoration: 'none' }}>sign in</Link>.
+        </p>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold">T</div>
-            <span className="font-semibold text-white">Trading Journal Pro</span>
-          </Link>
-          <h1 className="text-2xl font-bold text-white">Create your account</h1>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+      {/* Nav */}
+      <nav style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 28px', height: '56px',
+        borderBottom: '1px solid var(--border)', background: 'var(--bg2)',
+      }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <div style={{
+            width: '28px', height: '28px', background: 'var(--accent)',
+            borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'var(--mono)', fontSize: '12px', fontWeight: 700, color: '#000',
+          }}>TJ</div>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>Trading Journal Pro</span>
+        </Link>
+        <Link href="/login" style={{
+          fontSize: '12.5px', color: 'var(--text2)', textDecoration: 'none',
+          padding: '6px 14px', border: '1px solid var(--border2)', borderRadius: '4px',
+        }}>Sign In</Link>
+      </nav>
+
+      {/* Form */}
+      <div style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 16px',
+      }}>
+        <div style={{ width: '100%', maxWidth: '360px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{
+              width: '40px', height: '40px', background: 'var(--accent)',
+              borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--mono)', fontSize: '14px', fontWeight: 700, color: '#000',
+              margin: '0 auto 16px',
+            }}>TJ</div>
+            <h1 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '6px' }}>Create your account</h1>
+            <p style={{ fontSize: '13px', color: 'var(--text3)' }}>Start journaling your trades today</p>
+          </div>
+
+          <div style={{
+            background: 'var(--bg2)', border: '1px solid var(--border)',
+            borderRadius: '6px', padding: '24px',
+          }}>
+            {error && (
+              <div style={{
+                padding: '10px 12px', borderRadius: '4px', marginBottom: '16px',
+                background: 'rgba(255,77,106,0.1)', border: '1px solid rgba(255,77,106,0.2)',
+                color: 'var(--red)', fontSize: '12.5px',
+              }}>{error}</div>
+            )}
+
+            <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label className="form-label">Email</label>
+                <input type="email" className="form-input" placeholder="you@example.com"
+                  value={email} onChange={e => setEmail(e.target.value)} required />
+              </div>
+              <div>
+                <label className="form-label">Password</label>
+                <input type="password" className="form-input" placeholder="Min. 6 characters"
+                  value={password} onChange={e => setPassword(e.target.value)} required />
+              </div>
+              <div>
+                <label className="form-label">Confirm Password</label>
+                <input type="password" className="form-input" placeholder="Repeat password"
+                  value={confirm} onChange={e => setConfirm(e.target.value)} required />
+              </div>
+              <button
+                type="submit" disabled={loading}
+                style={{
+                  width: '100%', padding: '10px',
+                  background: '#fff', color: '#000',
+                  border: 'none', borderRadius: '4px',
+                  fontSize: '13.5px', fontWeight: 600,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.7 : 1, marginTop: '4px',
+                }}
+              >
+                {loading ? 'Creating…' : 'Create Account'}
+              </button>
+            </form>
+          </div>
+
+          <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--text3)', marginTop: '16px' }}>
+            Already have an account?{' '}
+            <Link href="/login" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Sign in</Link>
+          </p>
         </div>
-        <div className="card p-6">
-          {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm mb-5">{error}</div>}
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div><label className="form-label">Email</label><input type="email" className="form-input" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required /></div>
-            <div><label className="form-label">Password</label><input type="password" className="form-input" placeholder="Min. 6 characters" value={password} onChange={e => setPassword(e.target.value)} required /></div>
-            <div><label className="form-label">Confirm Password</label><input type="password" className="form-input" placeholder="Repeat password" value={confirm} onChange={e => setConfirm(e.target.value)} required /></div>
-            <button type="submit" className="btn-primary w-full py-3" disabled={loading}>{loading ? 'Creating…' : 'Create Account'}</button>
-          </form>
-        </div>
-        <p className="text-center text-sm text-[#8888a0] mt-4">Already have an account? <Link href="/login" className="text-blue-400">Sign in</Link></p>
       </div>
     </div>
   )

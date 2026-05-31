@@ -12,32 +12,124 @@ export default function LoginPage() {
   const [error, setError] = useState('')
 
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault(); setLoading(true); setError('')
+    e.preventDefault()
+    setLoading(true); setError('')
     const { error } = await getSupabaseClient().auth.signInWithPassword({ email, password })
     if (error) { setError(error.message); setLoading(false) }
     else { router.push('/dashboard'); router.refresh() }
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold">T</div>
-            <span className="font-semibold text-white">Trading Journal Pro</span>
-          </Link>
-          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="text-[#8888a0] text-sm mt-1">Sign in to your account</p>
+    <div style={{
+      minHeight: '100vh', background: 'var(--bg)',
+      display: 'flex', flexDirection: 'column',
+    }}>
+      {/* Nav */}
+      <nav style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 28px', height: '56px',
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--bg2)',
+      }}>
+        <Link href="/" style={{
+          display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none',
+        }}>
+          <div style={{
+            width: '28px', height: '28px', background: 'var(--accent)',
+            borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'var(--mono)', fontSize: '12px', fontWeight: 700, color: '#000',
+          }}>TJ</div>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>
+            Trading Journal Pro
+          </span>
+        </Link>
+        <Link href="/register" style={{
+          fontSize: '12.5px', color: 'var(--text2)', textDecoration: 'none',
+          padding: '6px 14px', border: '1px solid var(--border2)',
+          borderRadius: '4px', transition: 'all 0.15s',
+        }}>Create Account</Link>
+      </nav>
+
+      {/* Form */}
+      <div style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '40px 16px',
+      }}>
+        <div style={{ width: '100%', maxWidth: '360px' }}>
+
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{
+              width: '40px', height: '40px', background: 'var(--accent)',
+              borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--mono)', fontSize: '14px', fontWeight: 700, color: '#000',
+              margin: '0 auto 16px',
+            }}>TJ</div>
+            <h1 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '6px' }}>Welcome back</h1>
+            <p style={{ fontSize: '13px', color: 'var(--text3)' }}>Sign in to your account</p>
+          </div>
+
+          {/* Card */}
+          <div style={{
+            background: 'var(--bg2)', border: '1px solid var(--border)',
+            borderRadius: '6px', padding: '24px',
+          }}>
+            {error && (
+              <div style={{
+                padding: '10px 12px', borderRadius: '4px', marginBottom: '16px',
+                background: 'rgba(255,77,106,0.1)', border: '1px solid rgba(255,77,106,0.2)',
+                color: 'var(--red)', fontSize: '12.5px',
+              }}>{error}</div>
+            )}
+
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label">Password</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%', padding: '10px',
+                  background: '#fff', color: '#000',
+                  border: 'none', borderRadius: '4px',
+                  fontSize: '13.5px', fontWeight: 600,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.7 : 1,
+                  marginTop: '4px',
+                }}
+              >
+                {loading ? 'Signing in…' : 'Sign In'}
+              </button>
+            </form>
+          </div>
+
+          <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--text3)', marginTop: '16px' }}>
+            No account?{' '}
+            <Link href="/register" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+              Create one
+            </Link>
+          </p>
         </div>
-        <div className="card p-6">
-          {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm mb-5">{error}</div>}
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div><label className="form-label">Email</label><input type="email" className="form-input" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required /></div>
-            <div><label className="form-label">Password</label><input type="password" className="form-input" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required /></div>
-            <button type="submit" className="btn-primary w-full py-3" disabled={loading}>{loading ? 'Signing in…' : 'Sign In'}</button>
-          </form>
-        </div>
-        <p className="text-center text-sm text-[#8888a0] mt-4">No account? <Link href="/register" className="text-blue-400 hover:text-blue-300">Create one</Link></p>
       </div>
     </div>
   )
